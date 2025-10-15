@@ -22,6 +22,7 @@ Portal Customer Quotes
         'security/ir.model.access.csv',
         'security/portal_record_rules.xml',
         'views/portal_templates.xml',
+        'reports/quote_reports.xml',  
     ],
     'installable': True,
     'application': False,
