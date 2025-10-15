@@ -1,209 +1,288 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-  <!-- ========================= -->
-  <!-- Actions de rapport (PDF)  -->
-  <!-- ========================= -->
-  <report
-      id="action_report_quote_prices"
-      model="sale.order"
-      string="Quotation (with prices)"
-      report_type="qweb-pdf"
-      name="portal_customer_quotes.report_quote_prices"
-      file="portal_customer_quotes.report_quote_prices"
-      print_report_name="'%s - Quotation.pdf' % (object.name or 'Quotation')"
-      />
+  <data>
 
-  <report
-      id="action_report_quote_noprices"
-      model="sale.order"
-      string="Quotation (no prices)"
-      report_type="qweb-pdf"
-      name="portal_customer_quotes.report_quote_noprices"
-      file="portal_customer_quotes.report_quote_noprices"
-      print_report_name="'%s - Quotation (no prices).pdf' % (object.name or 'Quotation')"
-      />
+    <!-- ========================= -->
+    <!-- 1) BASE (factorisée)      -->
+    <!-- ========================= -->
+    <template id="modern_report_saleorder_base">
+      <t t-set="title">Quotation Report</t>
 
-  <!-- ========================= -->
-  <!-- Gabarit : AVEC PRIX       -->
-  <!-- ========================= -->
-  <template id="report_quote_prices">
-    <t t-call="web.html_container">
-      <t t-foreach="docs" t-as="o">
-        <t t-call="web.external_layout">
-          <div class="page">
-            <h2 class="mt0">
-              <span t-esc="o.company_id.name"/> — <t t-esc="o.name"/>
+      <!-- company -->
+      <t t-if="o and 'company_id' in o">
+        <t t-set="company" t-value="o.company_id"/>
+      </t>
+      <t t-if="not o or not 'company_id' in o">
+        <t t-set="company" t-value="res_company"/>
+      </t>
+
+      <!-- ======= En-tête avec logo / adresse / # de devis + code-barres ======= -->
+      <div class="header">
+        <div class="row" style="margin: 0; display: flex; align-items: flex-start; justify-content: space-between;">
+          <!-- Logo -->
+          <div class="col-2" style="display: flex; justify-content: flex-start; align-items: center; padding-right: 0px;">
+            <img t-att-src="image_data_uri(company.logo)" alt="Company Logo" style="max-width: 120px;"/>
+          </div>
+
+          <!-- Adresse company -->
+          <div class="col-6" style="display: flex; justify-content: flex-start; align-items: center; padding-left: 0px;">
+            <div itemprop="address" class="address">
+              <ul class="list-unstyled" style="margin-bottom: 0;">
+                <li t-if="company.is_company_details_empty">
+                  <t t-esc="company.partner_id"
+                     t-options="{'widget': 'contact', 'fields': ['address','name'], 'no_marker': True}"/>
+                </li>
+                <li t-else=""><t t-esc="company.company_details"/></li>
+                <li t-if="forced_vat">
+                  <t t-esc="company.country_id.vat_label or 'Tax ID'"/>:
+                  <span t-esc="forced_vat"/>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Titre + numéro + code-barres -->
+          <div class="col-4" style="display: flex; flex-direction: column; align-items: center; text-align: center; padding-right: 0px;">
+            <h2 style="margin: 0; font-size: 32px; font-weight: bold; text-align: center; color:#0AA2C0">
+              <span t-if="doc.state in ['draft', 'sent']">QUOTATION</span>
+              <span t-else="">SALE ORDER</span>
             </h2>
-            <p class="mb8 text-muted">
-              <t t-esc="o.company_id.partner_id.contact_address"/>
-              <br/><t t-esc="o.company_id.phone"/> • <t t-esc="o.company_id.email"/>
-            </p>
 
-            <div class="row mb16">
-              <div class="col-6">
-                <strong t-translation="on">Customer</strong><br/>
-                <t t-esc="o.partner_id.name"/><br/>
-                <t t-esc="o.partner_id.contact_address"/>
-              </div>
-              <div class="col-6">
-                <table class="table table-sm o_main_table" style="width:100%">
-                  <tbody>
-                    <tr>
-                      <td><strong t-translation="on">Date</strong></td>
-                      <td class="text-end"><t t-esc="o.date_order and o.date_order.date()"/></td>
-                    </tr>
-                    <tr>
-                      <td><strong t-translation="on">Customer Reference</strong></td>
-                      <td class="text-end"><t t-esc="o.x_customer_reference or '-'"/></td>
-                    </tr>
-                    <tr>
-                      <td><strong t-translation="on">Expected Delivery</strong></td>
-                      <td class="text-end"><t t-esc="o.x_expected_date or '-'"/></td>
+            <h3 t-attf-style="color:#{company.text_color_sale}; margin: 0; font-weight: bold; font-size: 16px; line-height: 1;">
+              <t t-if="doc.state in ['draft','sent']">
+                <span t-attf-style="color:#{company.text_color_sale};">
+                  Quotation #:
+                  <span t-if="doc.name" t-field="doc.name" style="font-size: 16px; font-weight: bold;"/>
+                </span>
+              </t>
+              <t t-else="">
+                <span t-attf-style="color:#{company.text_color_sale};">
+                  Order #:
+                  <span t-if="doc.name" t-field="doc.name" style="font-size: 16px; font-weight: bold;"/>
+                </span>
+              </t>
+            </h3>
+
+            <img t-att-src="'/report/barcode/Code128/' + doc.name + '?width=200&amp;height=50'"
+                 style="width: 200px; height: 11mm; margin-top: 10px;" alt="Quotation Barcode"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======= Corps du rapport ======= -->
+      <t t-call="web.external_layout">
+        <!-- forcer la langue du partenaire -->
+        <t t-set="doc" t-value="doc.with_context({'lang': doc.partner_id.lang})"/>
+
+        <div class="page" style="overflow: hidden;">
+          <div class="oe_structure"/>
+
+          <!-- Bloc infos client / dates -->
+          <table class="table table-sm table-borderless" style="table-layout:fixed;">
+            <thead>
+              <tr>
+                <th width="30px" t-attf-style="background-color:#{company.color_sale}; color:#{company.text_color_sale}; text-align:left;">Customer</th>
+                <th width="20px" t-attf-style="background-color:#{company.color_sale}; color:#{company.text_color_sale};">Quotation Date</th>
+                <th width="20px" t-attf-style="background-color:#{company.color_sale}; color:#{company.text_color_sale};">Expiration</th>
+                <th width="20px" t-if="doc.client_order_ref" t-attf-style="background-color:#{company.color_sale}; color:#{company.text_color_sale};">Reference</th>
+                <th width="30px" t-attf-style="background-color:#{company.color_sale}; color:#{company.text_color_sale}; text-align:left;">Invoicing and shipping address</th>
+              </tr>
+            </thead>
+            <tbody class="sale_tbody">
+              <tr>
+                <td>
+                  <div t-field="doc.partner_id"/>
+                  <t t-if="doc.partner_id.street"><t t-esc="doc.partner_id.street"/></t><br/>
+                  <t t-if="doc.partner_id.street2"><t t-esc="doc.partner_id.street2"/><br/></t>
+                  <t t-if="doc.partner_id.city"><t t-esc="doc.partner_id.city"/><br/></t>
+                  <t t-if="doc.partner_id.state_id.name"><t t-esc="doc.partner_id.state_id.name"/></t><br/>
+                  <t t-if="doc.partner_id.country_id.name"><t t-esc="doc.partner_id.country_id.name"/></t><br/>
+                  <t t-if="doc.partner_id.zip"><t t-esc="doc.partner_id.zip"/></t><br/>
+                  <div t-field="doc.partner_id.vat"/>
+                </td>
+
+                <td class="text-center">
+                  <span t-field="doc.date_order" t-options="{'widget': 'date'}"/>
+                </td>
+
+                <td class="text-center" t-if="doc.validity_date">
+                  <span t-field="doc.validity_date" t-options="{'widget': 'date'}"/>
+                </td>
+
+                <td class="text-center" t-if="doc.client_order_ref">
+                  <strong><span t-field="doc.client_order_ref"/></strong>
+                </td>
+
+                <td style="text-align:left;">
+                  <div t-field="doc.partner_invoice_id"/>
+                  <t t-if="doc.partner_invoice_id.street"><t t-esc="doc.partner_invoice_id.street"/></t><br/>
+                  <t t-if="doc.partner_invoice_id.street2"><t t-esc="doc.partner_invoice_id.street2"/><br/></t>
+                  <t t-if="doc.partner_invoice_id.city"><t t-esc="doc.partner_invoice_id.city"/></t>
+                  <t t-if="doc.partner_invoice_id.state_id"><t t-esc="doc.partner_invoice_id.state_id.name"/></t><br/>
+                  <t t-if="doc.partner_invoice_id.country_id"><t t-esc="doc.partner_invoice_id.country_id.name"/></t><br/>
+                  <t t-if="doc.partner_invoice_id.zip"><t t-esc="doc.partner_invoice_id.zip"/></t><br/>
+                  <div t-field="doc.partner_invoice_id.vat"/>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- y a-t-il au moins un discount ? -->
+          <t t-set="display_discount" t-value="any([l.discount for l in doc.order_line])"/>
+
+          <!-- Lignes -->
+          <table class="table table-sm table-borderless">
+            <thead>
+              <tr>
+                <th t-attf-style="background-color:#{company.color_sale}; color:#{company.text_color_sale};">Product</th>
+                <th t-attf-style="background-color:#{company.color_sale}; color:#{company.text_color_sale};">Description</th>
+                <th t-attf-style="background-color:#{company.color_sale}; color:#{company.text_color_sale};" class="text-right">QTY</th>
+
+                <!-- colonnes PRIX conditionnelles -->
+                <th t-if="show_prices" t-attf-style="background-color:#{company.color_sale}; color:#{company.text_color_sale};" class="text-right">Unit Price</th>
+                <th t-if="show_prices and display_discount" t-attf-style="background-color:#{company.color_sale}; color:#{company.text_color_sale};" class="text-right">Disc.(%)</th>
+                <th t-if="show_prices" t-attf-style="background-color:#{company.color_sale}; color:#{company.text_color_sale};" class="text-right">Taxes</th>
+                <th t-if="show_prices" t-attf-style="background-color:#{company.color_sale}; color:#{company.text_color_sale};" class="text-right">Price</th>
+              </tr>
+            </thead>
+
+            <tbody class="sale_tbody">
+              <t t-foreach="doc.order_line" t-as="l" t-if="not l.is_delivery">
+                <tr t-if="l.product_uom_qty">
+                  <td>
+                    <t t-if="l.product_id.default_code">
+                      <span t-field="l.product_id.default_code"/>
+                    </t>
+                    <t t-else=""><span t-field="l.product_id.name"/></t>
+                  </td>
+                  <td style="white-space: normal; word-break: break-word; max-width: 200px;">
+                    <span t-field="l.name"/>
+                  </td>
+                  <td class="text-center">
+                    <span t-field="l.product_uom_qty"/>
+                    <span groups="product.group_uom" t-field="l.product_uom"/>
+                  </td>
+
+                  <!-- cellules PRIX conditionnelles -->
+                  <td t-if="show_prices" class="text-center">
+                    <span t-field="l.price_unit"/>
+                  </td>
+                  <td t-if="show_prices and display_discount" class="text-center">
+                    <span t-field="l.discount"/>
+                  </td>
+                  <td t-if="show_prices" class="text-center">
+                    <span t-esc="', '.join(map(lambda x: (x.description or x.name), l.tax_id))"/>
+                  </td>
+                  <td t-if="show_prices" class="text-center">
+                    <span t-field="l.price_subtotal"/>
+                  </td>
+                </tr>
+              </t>
+            </tbody>
+          </table>
+
+          <!-- Totaux : affichés uniquement si show_prices -->
+          <t t-if="show_prices">
+            <br/>
+            <div name="total" class="totals-container"
+                 style="page-break-inside: avoid; break-inside: avoid; width: 100%; max-width: 300px; margin-left: auto; margin-right: 0; position: relative; display: block; clear: both;">
+              <div class="totals-inner" style="width: 100%; page-break-inside: avoid; break-inside: avoid;">
+                <table class="table table-condensed table-borderless" style="page-break-inside: avoid; break-inside: avoid; width: 100%; margin-bottom: 0;">
+                  <tbody style="page-break-inside: avoid;">
+                    <t t-set="custom_subtotal" t-value="round(sum(l.price_subtotal for l in doc.order_line if not l.is_delivery), 2)"/>
+                    <t t-set="tax_totals" t-value="doc.tax_totals"/>
+
+                    <t t-foreach="tax_totals['subtotals']" t-as="subtotal">
+                      <!-- Subtotal -->
+                      <tr class="border-black o_subtotal" t-attf-style="color:#{company.text_color_account};">
+                        <td t-attf-style="color:#{company.text_color_account}; padding-right: 10px; white-space: nowrap;">
+                          <strong t-esc="subtotal['name']"/>
+                        </td>
+                        <td class="text-end" t-attf-style="color:#{company.text_color_account}; width: 100px; text-align: right; white-space: nowrap;">
+                          <span t-att-class="oe_subtotal_footer_separator" t-esc="custom_subtotal"/>
+                          <span t-field="doc.currency_id.symbol"/>
+                        </td>
+                      </tr>
+
+                      <!-- Shipping -->
+                      <tr class="border-black o_total">
+                        <td t-attf-style="color:#{company.text_color_account}; padding-right: 10px; white-space: nowrap;">
+                          <strong>Shipping Total</strong>
+                        </td>
+                        <td class="text-end" t-attf-style="color:#{company.text_color_account}; width: 100px; text-align: right; white-space: nowrap;">
+                          <span t-att-class="oe_subtotal_footer_separator"
+                                t-esc="round(sum(l.price_subtotal for l in doc.order_line if l.is_delivery), 2) or 0"/>
+                          <span t-field="doc.currency_id.symbol"/>
+                        </td>
+                      </tr>
+
+                      <!-- Taxes groupées -->
+                      <t t-set="subtotal_to_show" t-value="subtotal['name']"/>
+                      <t t-call="account.tax_groups_totals"/>
+                    </t>
+
+                    <!-- Total -->
+                    <tr class="border-black">
+                      <td t-attf-style="background-color:#{company.color_sale}; color:#{company.text_color_sale}; padding-right: 10px; white-space: nowrap;">
+                        <strong>Total</strong>
+                      </td>
+                      <td t-attf-style="background-color:#{company.color_sale}; color:#{company.text_color_sale}; width: 100px; text-align: right; white-space: nowrap;" class="text-right">
+                        <span t-field="doc.amount_total"/>
+                      </td>
                     </tr>
                   </tbody>
                 </table>
               </div>
             </div>
+          </t>
 
-            <t t-if="o.x_project_description">
-              <p class="mb16">
-                <strong t-translation="on">Project Description:</strong><br/>
-                <span t-esc="o.x_project_description"/>
-              </p>
-            </t>
-
-            <table class="table table-sm o_main_table" style="width:100%">
-              <thead>
-                <tr>
-                  <th t-translation="on">Product</th>
-                  <th t-translation="on">Description</th>
-                  <th class="text-end" t-translation="on">Qty</th>
-                  <th class="text-end" t-translation="on">Unit Price</th>
-                  <th class="text-end" t-translation="on">Subtotal</th>
-                </tr>
-              </thead>
-              <tbody>
-                <t t-foreach="o.order_line" t-as="l">
-                  <tr>
-                    <td><t t-esc="l.product_id.display_name"/></td>
-                    <td><t t-esc="l.name"/></td>
-                    <td class="text-end"><t t-esc="l.product_uom_qty"/></td>
-                    <td class="text-end">
-                      <span t-field="l.price_unit" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
-                    </td>
-                    <td class="text-end">
-                      <span t-field="l.price_subtotal" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
-                    </td>
-                  </tr>
-                </t>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <td colspan="4" class="text-end"><strong t-translation="on">Untaxed Amount</strong></td>
-                  <td class="text-end">
-                    <span t-field="o.amount_untaxed" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
-                  </td>
-                </tr>
-                <tr>
-                  <td colspan="4" class="text-end"><strong t-translation="on">Taxes</strong></td>
-                  <td class="text-end">
-                    <span t-field="o.amount_tax" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
-                  </td>
-                </tr>
-                <tr>
-                  <td colspan="4" class="text-end"><strong t-translation="on">Total</strong></td>
-                  <td class="text-end">
-                    <span t-field="o.amount_total" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
-
-            <t t-if="o.x_note">
-              <div class="mt16">
-                <strong t-translation="on">Notes</strong>
-                <div><t t-esc="o.x_note"/></div>
-              </div>
-            </t>
+          <!-- Notes / conditions (toujours visibles) -->
+          <div t-attf-style="color:#{company.text_color_sale}; font:15px lucida-console,sans-serif;">
+            <p t-if="doc.note"><strong><span>Note:</span></strong> <span t-field="doc.note"/></p>
           </div>
-        </t>
-      </t>
-    </t>
-  </template>
-
-  <!-- ========================= -->
-  <!-- Gabarit : SANS PRIX       -->
-  <!-- ========================= -->
-  <template id="report_quote_noprices">
-    <t t-call="web.html_container">
-      <t t-foreach="docs" t-as="o">
-        <t t-call="web.external_layout">
-          <div class="page">
-            <h2 class="mt0">
-              <span t-esc="o.company_id.name"/> — <t t-esc="o.name"/> (No prices)
-            </h2>
-
-            <div class="row mb16">
-              <div class="col-6">
-                <strong t-translation="on">Customer</strong><br/>
-                <t t-esc="o.partner_id.name"/><br/>
-                <t t-esc="o.partner_id.contact_address"/>
-              </div>
-              <div class="col-6">
-                <table class="table table-sm o_main_table" style="width:100%">
-                  <tbody>
-                    <tr>
-                      <td><strong t-translation="on">Date</strong></td>
-                      <td class="text-end"><t t-esc="o.date_order and o.date_order.date()"/></td>
-                    </tr>
-                    <tr>
-                      <td><strong t-translation="on">Customer Reference</strong></td>
-                      <td class="text-end"><t t-esc="o.x_customer_reference or '-'"/></td>
-                    </tr>
-                    <tr>
-                      <td><strong t-translation="on">Expected Delivery</strong></td>
-                      <td class="text-end"><t t-esc="o.x_expected_date or '-'"/></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <t t-if="o.x_project_description">
-              <p class="mb16">
-                <strong t-translation="on">Project Description:</strong><br/>
-                <span t-esc="o.x_project_description"/>
-              </p>
-            </t>
-
-            <table class="table table-sm o_main_table" style="width:100%">
-              <thead>
-                <tr>
-                  <th t-translation="on">Product</th>
-                  <th t-translation="on">Description</th>
-                  <th class="text-end" t-translation="on">Qty</th>
-                </tr>
-              </thead>
-              <tbody>
-                <t t-foreach="o.order_line" t-as="l">
-                  <tr>
-                    <td><t t-esc="l.product_id.display_name"/></td>
-                    <td><t t-esc="l.name"/></td>
-                    <td class="text-end"><t t-esc="l.product_uom_qty"/></td>
-                  </tr>
-                </t>
-              </tbody>
-            </table>
-
-            <t t-if="o.x_note">
-              <div class="mt16">
-                <strong t-translation="on">Notes</strong>
-                <div><t t-esc="o.x_note"/></div>
-              </div>
-            </t>
+          <div t-attf-style="color:#{company.text_color_sale}; font:15px lucida-console,sans-serif;">
+            <p t-if="doc.payment_term_id"><strong><span>Payment Term :</span></strong> <span t-field="doc.payment_term_id"/></p>
           </div>
-        </t>
+
+          <div class="oe_structure"/>
+        </div>
       </t>
-    </t>
-  </template>
+    </template>
+
+    <!-- ========================= -->
+    <!-- 2) VARIANTE : AVEC PRIX   -->
+    <!-- ========================= -->
+    <template id="modern_report_saleorder_with_prices">
+      <t t-set="show_prices" t-value="True"/>
+      <t t-call="portal_customer_quotes.modern_report_saleorder_base"/>
+    </template>
+
+    <!-- ========================= -->
+    <!-- 3) VARIANTE : SANS PRIX   -->
+    <!-- ========================= -->
+    <template id="modern_report_saleorder_without_prices">
+      <t t-set="show_prices" t-value="False"/>
+      <t t-call="portal_customer_quotes.modern_report_saleorder_base"/>
+    </template>
+
+    <!-- ========================= -->
+    <!-- 4) Actions de rapport     -->
+    <!-- ========================= -->
+    <record id="action_modern_report_saleorder_with_prices" model="ir.actions.report">
+      <field name="name">Quotation (with prices)</field>
+      <field name="model">sale.order</field>
+      <field name="report_type">qweb-pdf</field>
+      <field name="report_name">portal_customer_quotes.modern_report_saleorder_with_prices</field>
+      <field name="print_report_name">'Quotation_' + (object.name or 'SO')</field>
+    </record>
+
+    <record id="action_modern_report_saleorder_without_prices" model="ir.actions.report">
+      <field name="name">Quotation (no prices)</field>
+      <field name="model">sale.order</field>
+      <field name="report_type">qweb-pdf</field>
+      <field name="report_name">portal_customer_quotes.modern_report_saleorder_without_prices</field>
+      <field name="print_report_name">'Quotation_NoPrices_' + (object.name or 'SO')</field>
+    </record>
+
+  </data>
 </odoo>

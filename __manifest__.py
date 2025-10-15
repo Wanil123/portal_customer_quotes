@@ -8,7 +8,7 @@
 Portal Customer Quotes
 ======================
 * Clients (Portail) : lister / créer / modifier leurs soumissions (états brouillon/envoyée)
-* Sélection de produit au niveau *variante* (product.product)
+* Sélection de produit au niveau variante (product.product)
 * Affichage image / variantes / description
 * Frais d’expédition fixe Québec : 37,00 $
 * I18n complet (FR/EN)
@@ -17,12 +17,12 @@ Portal Customer Quotes
     'author': 'Wanil Parfait',
     'website': '',
     'license': 'LGPL-3',
-    'depends': ['sale', 'portal', 'product'],
+    'depends': ['sale', 'portal', 'product', 'account', 'delivery'],
     'data': [
         'security/ir.model.access.csv',
         'security/portal_record_rules.xml',
         'views/portal_templates.xml',
-        'reports/quote_reports.xml',  
+        'reports/quote_reports.xml',
     ],
     'installable': True,
     'application': False,
