@@ -144,17 +144,18 @@
             <div class="card-body">
 
               <!-- Description projet -->
-              <div class="mb-3">
-                <label class="form-label fw-bold">
-                  <span t-translation="on">Project Description</span>
-                  <span class="text-danger">*</span>
-                </label>
-                <textarea name="x_project_description"
-                          class="form-control"
-                          rows="3"
-                          required="required"
-                          t-attf-placeholder="#{_('Describe your project…')}"><t t-if="quote" t-esc="quote.x_project_description or ''"/></textarea>
-              </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">
+                <span t-translation="on">Project Description</span>
+                <span class="text-danger">*</span>
+              </label>
+              <t t-set="placeholder_project" t-value="'Describe your project…' if request.env.context.get('lang', 'en_US').startswith('en') else 'Décrivez votre projet…'"/>
+              <textarea name="x_project_description"
+                        class="form-control"
+                        rows="3"
+                        required="required"
+                        t-att-placeholder="placeholder_project"><t t-if="quote" t-esc="quote.x_project_description or ''"/></textarea>
+            </div>
 
               <div class="row g-3 mb-3">
                 <!-- Référence client -->
@@ -166,7 +167,8 @@
                   <input name="x_customer_reference"
                          class="form-control"
                          required="required"
-                         t-attf-placeholder="#{_('Customer reference (e.g., PO-12345)')}"
+                         placeholder="Customer reference (e.g., PO-12345)"
+                         data-translate="placeholder"
                          t-att-value="quote.x_customer_reference if quote else ''"/>
                 </div>
 
@@ -192,7 +194,8 @@
                 <textarea name="x_note"
                           class="form-control"
                           rows="2"
-                          t-attf-placeholder="#{_('Any additional notes…')}"><t t-if="quote" t-esc="quote.x_note or ''"/></textarea>
+                          placeholder="Any additional notes…"
+                          data-translate="placeholder"><t t-if="quote" t-esc="quote.x_note or ''"/></textarea>
               </div>
             </div>
           </div>
@@ -222,7 +225,7 @@
                   </thead>
                   <tbody>
 
-                    <!-- Ligne d’ajout -->
+                    <!-- Ligne d'ajout -->
                     <tr class="table-success">
                       <td>
                         <select id="pcq-cat" class="form-select form-select-sm">
@@ -267,7 +270,6 @@
                           </td>
                           <td><strong><t t-esc="l.product_id.display_name"/></strong></td>
 
-                          <!-- ====== CORRIGÉ ICI : variantes = variantes + attributs non-variant ====== -->
                           <td class="text-center">
                             <t t-set="ptavs"
                                t-value="l.product_id.product_template_attribute_value_ids | l.product_no_variant_attribute_value_ids"/>
@@ -276,7 +278,6 @@
                               <t t-else="">—</t>
                             </small>
                           </td>
-                          <!-- ====================================================================== -->
 
                           <td class="text-center">
                             <t t-if="l.product_id.image_128">
@@ -496,7 +497,6 @@
             inherit_id="sale.sale_order_portal_content"
             name="Portal: Quote print buttons">
 
-    <!-- On insère APRES le tableau de totaux -->
     <xpath expr="//t[@t-call='sale.sale_order_portal_content_totals_table']" position="after">
       <div class="o_portal_call_to_action mt-3 d-print-none">
         <a class="btn btn-secondary me-2"

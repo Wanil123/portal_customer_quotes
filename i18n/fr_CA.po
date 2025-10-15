@@ -239,8 +239,8 @@ msgstr "Imprimer (sans prix)"
 # ---------------------------
 #. module: portal_customer_quotes
 #: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
-msgid "Describe your project..."
-msgstr "Décrivez votre projet..."
+msgid "Describe your project…"
+msgstr "Décrivez votre projet…"
 
 #. module: portal_customer_quotes
 #: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
