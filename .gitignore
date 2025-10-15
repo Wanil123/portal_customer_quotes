@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.env
+.venv
+*.log
+
+# Odoo
+*.pot
+*.po~
+*.swp
+*.swx
+*.iml
+.idea/
+*.zip
+*.tar.gz
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/

@@ -1,0 +1,504 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ========================================= -->
+  <!-- Liste de devis (Portail)                  -->
+  <!-- ========================================= -->
+  <template id="portal_my_quotes" name="Portal: My Quotes">
+    <t t-call="portal.portal_layout">
+      <div class="container my-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h2 class="mb-0">
+            <i class="fa fa-file-text-o me-2"></i>
+            <span t-translation="on">My Quotes</span>
+          </h2>
+          <a class="btn btn-primary" href="/my/quotes/new">
+            <i class="fa fa-plus me-1"></i>
+            <span t-translation="on">New Quote</span>
+          </a>
+        </div>
+
+        <t t-if="not quotes">
+          <div class="alert alert-info">
+            <i class="fa fa-info-circle me-2"></i>
+            <span t-translation="on">No quotes yet.</span>
+          </div>
+        </t>
+        <t t-else="">
+          <div class="table-responsive">
+            <table class="table table-hover table-bordered">
+              <thead class="table-light">
+                <tr>
+                  <th><span t-translation="on">Quote</span></th>
+                  <th><span t-translation="on">Date</span></th>
+                  <th><span t-translation="on">Status</span></th>
+                  <th class="text-end"><span t-translation="on">Actions</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <t t-foreach="quotes" t-as="q">
+                  <tr>
+                    <td>
+                      <a t-att-href="'/my/quotes/%s/edit' % q.id" class="fw-bold">
+                        <t t-esc="q.name or ('SO%s' % q.id)"/>
+                      </a>
+                    </td>
+                    <td>
+                      <t t-esc="q.create_date.strftime('%Y-%m-%d') if q.create_date else ''"/>
+                    </td>
+
+                    <!-- Statut : Draft / Sent (traduisibles) -->
+                    <td>
+                      <t t-set="badge"
+                         t-value="'bg-warning' if q.state == 'draft' else ('bg-info' if q.state == 'sent' else 'bg-secondary')"/>
+                      <span t-att-class="'badge %s' % badge">
+                        <t t-if="q.state == 'draft'">
+                          <span t-translation="on">Draft</span>
+                        </t>
+                        <t t-elif="q.state == 'sent'">
+                          <span t-translation="on">Sent</span>
+                        </t>
+                        <t t-else="">
+                          <t t-esc="q.state"/>
+                        </t>
+                      </span>
+                    </td>
+
+                    <td class="text-end">
+                      <a class="btn btn-sm btn-outline-primary me-2"
+                         t-att-href="'/my/quotes/%s/edit' % q.id">
+                        <i class="fa fa-pencil me-1"></i>
+                        <span t-translation="on">Edit</span>
+                      </a>
+                      <t t-if="q.state == 'draft'">
+                        <form t-att-action="'/my/quotes/%s/delete' % q.id"
+                              method="post"
+                              class="d-inline"
+                              onsubmit="return confirm('Delete this quote?');">
+                          <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                          <button class="btn btn-sm btn-outline-danger" type="submit">
+                            <i class="fa fa-trash me-1"></i>
+                            <span t-translation="on">Delete</span>
+                          </button>
+                        </form>
+                      </t>
+                    </td>
+                  </tr>
+                </t>
+              </tbody>
+            </table>
+          </div>
+        </t>
+      </div>
+    </t>
+  </template>
+
+  <!-- ========================================= -->
+  <!-- Formulaire de devis (Portail)             -->
+  <!-- ========================================= -->
+  <template id="portal_quote_form" name="Portal: Quote Form">
+    <t t-call="portal.portal_layout">
+      <div class="container my-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h2 class="mb-0">
+            <t t-if="not quote">
+              <i class="fa fa-file-text-o me-2"></i>
+              <span t-translation="on">Get a Quote</span>
+            </t>
+            <t t-else="">
+              <i class="fa fa-edit me-2"></i>
+              <t t-esc="quote.name or 'Edit Quote'"/>
+            </t>
+          </h2>
+          <a class="btn btn-secondary" href="/my/quotes">
+            <i class="fa fa-arrow-left me-1"></i>
+            <span t-translation="on">Back</span>
+          </a>
+        </div>
+
+        <!-- Alerte erreurs serveur -->
+        <t t-if="errors">
+          <div class="alert alert-danger" role="alert">
+            <h5 class="alert-heading">
+              <i class="fa fa-exclamation-triangle me-2"></i>
+              <span t-translation="on">Please correct the following errors:</span>
+            </h5>
+            <ul class="mb-0">
+              <t t-foreach="errors" t-as="error">
+                <li><t t-esc="error"/></li>
+              </t>
+            </ul>
+          </div>
+        </t>
+
+        <!-- Alerte erreurs client -->
+        <div id="pcq-alert" class="alert alert-danger d-none" role="alert"></div>
+
+        <form id="pcq-form" method="post"
+              t-att-action="'/my/quotes/new' if not quote else '/my/quotes/%s/edit' % quote.id">
+          <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+          <!-- Bloc infos devis -->
+          <div class="card mb-4">
+            <div class="card-header bg-light">
+              <h5 class="mb-0">
+                <i class="fa fa-info-circle me-2"></i>
+                <span t-translation="on">Quote Information</span>
+              </h5>
+            </div>
+            <div class="card-body">
+
+              <!-- Description projet -->
+              <div class="mb-3">
+                <label class="form-label fw-bold">
+                  <span t-translation="on">Project Description</span>
+                  <span class="text-danger">*</span>
+                </label>
+                <textarea name="x_project_description"
+                          class="form-control"
+                          rows="3"
+                          required="required"
+                          t-attf-placeholder="#{_('Describe your project...')}"><t t-if="quote" t-esc="quote.x_project_description or ''"/></textarea>
+              </div>
+
+              <div class="row g-3 mb-3">
+                <!-- Référence client -->
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">
+                    <span t-translation="on">Customer Reference</span>
+                    <span class="text-danger">*</span>
+                  </label>
+                  <input name="x_customer_reference"
+                         class="form-control"
+                         required="required"
+                         t-attf-placeholder="#{_('Customer reference (e.g., PO-12345)')}"
+                         t-att-value="quote.x_customer_reference if quote else ''"/>
+                </div>
+
+                <!-- Date de livraison prévue -->
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">
+                    <span t-translation="on">Expected Delivery Date</span>
+                    <span class="text-danger">*</span>
+                  </label>
+                  <input name="x_expected_date"
+                         type="date"
+                         class="form-control"
+                         required="required"
+                         t-att-value="quote.x_expected_date if quote else ''"/>
+                </div>
+              </div>
+
+              <!-- Note -->
+              <div class="mb-0">
+                <label class="form-label fw-bold">
+                  <span t-translation="on">Note</span>
+                </label>
+                <textarea name="x_note"
+                          class="form-control"
+                          rows="2"
+                          t-attf-placeholder="#{_('Any additional notes...')}"><t t-if="quote" t-esc="quote.x_note or ''"/></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bloc Produits -->
+          <div class="card mb-4">
+            <div class="card-header bg-light">
+              <h5 class="mb-0">
+                <i class="fa fa-shopping-cart me-2"></i>
+                <span t-translation="on">Products</span>
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-bordered align-middle">
+                  <thead class="table-light">
+                    <tr>
+                      <th style="width: 150px;"><span t-translation="on">Category</span></th>
+                      <th><span t-translation="on">Product</span></th>
+                      <th style="width: 120px;"><span t-translation="on">Variant</span></th>
+                      <th style="width: 80px;" class="text-center"><span t-translation="on">Image</span></th>
+                      <th style="width: 100px;" class="text-end"><span t-translation="on">Price ($)</span></th>
+                      <th style="width: 200px;"><span t-translation="on">Description</span></th>
+                      <th style="width: 100px;" class="text-end"><span t-translation="on">Quantity</span></th>
+                      <th style="width: 100px;" class="text-center"><span t-translation="on">Remove</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+
+                    <!-- Ligne d’ajout -->
+                    <tr class="table-success">
+                      <td>
+                        <select id="pcq-cat" class="form-select form-select-sm">
+                          <option value=""><t t-translation="on">Select Category</t></option>
+                          <t t-foreach="categories" t-as="c">
+                            <option t-att-value="c.id"><t t-esc="c.complete_name"/></option>
+                          </t>
+                        </select>
+                      </td>
+                      <td>
+                        <select id="pcq-product" name="add_product" class="form-select form-select-sm">
+                          <option value=""><t t-translation="on">Select Product</t></option>
+                          <t t-foreach="products" t-as="p">
+                            <option t-att-value="p.id" t-att-data-cat="p.categ_id.id">
+                              <t t-esc="p.display_name"/>
+                            </option>
+                          </t>
+                        </select>
+                      </td>
+                      <td class="text-muted text-center">—</td>
+                      <td class="text-muted text-center">—</td>
+                      <td class="text-muted text-end">$0.00</td>
+                      <td class="text-muted">—</td>
+                      <td>
+                        <input class="form-control form-select-sm text-end"
+                               type="number" step="1" min="1" name="add_qty" value="1"/>
+                      </td>
+                      <td class="text-center">
+                        <button class="btn btn-success btn-sm w-100" name="action" value="add" type="submit">
+                          <i class="fa fa-plus me-1"></i>
+                          <span t-translation="on">Add</span>
+                        </button>
+                      </td>
+                    </tr>
+
+                    <!-- Lignes existantes -->
+                    <t t-if="quote and quote.order_line">
+                      <t t-foreach="quote.order_line" t-as="l">
+                        <tr class="pcq-existing-row">
+                          <td>
+                            <t t-set="cat" t-value="l.product_id.categ_id"/>
+                            <small><t t-esc="cat.complete_name if cat else '—'"/></small>
+                          </td>
+                          <td><strong><t t-esc="l.product_id.display_name"/></strong></td>
+                          <td class="text-center">
+                            <t t-set="ptavs" t-value="l.product_id.product_template_attribute_value_ids"/>
+                            <small>
+                              <t t-if="ptavs"><t t-esc="', '.join(ptavs.mapped('name'))"/></t>
+                              <t t-else="">—</t>
+                            </small>
+                          </td>
+                          <td class="text-center">
+                            <t t-if="l.product_id.image_128">
+                              <img t-att-src="'/web/image/product.product/%s/image_128' % l.product_id.id" style="height:40px;" class="img-thumbnail"/>
+                            </t>
+                            <t t-elif="l.product_id.product_tmpl_id.image_128">
+                              <img t-att-src="'/web/image/product.template/%s/image_128' % l.product_id.product_tmpl_id.id" style="height:40px;" class="img-thumbnail"/>
+                            </t>
+                            <t t-else=""><span class="text-muted">—</span></t>
+                          </td>
+                          <td class="text-end"><strong>$<t t-esc="'%.2f' % l.price_unit"/></strong></td>
+                          <td><small class="text-muted"><t t-esc="l.name[:50] if l.name else ''"/>...</small></td>
+                          <td>
+                            <input class="form-control form-control-sm text-end"
+                                   type="number" step="0.01" min="0"
+                                   t-att-name="'set_qty_%s' % l.id"
+                                   t-att-value="l.product_uom_qty"/>
+                          </td>
+                          <td class="text-center">
+                            <button class="btn btn-outline-danger btn-sm w-100" name="rm_line" t-att-value="l.id" type="submit">
+                              <i class="fa fa-trash"></i>
+                            </button>
+                          </td>
+                        </tr>
+                      </t>
+                    </t>
+
+                    <!-- Vide -->
+                    <t t-if="not quote or not quote.order_line">
+                      <tr>
+                        <td colspan="8" class="text-center text-muted py-4">
+                          <i class="fa fa-inbox fa-2x mb-2"></i>
+                          <p class="mb-0">
+                            <span t-translation="on">No products added yet. Use the row above to add products.</span>
+                          </p>
+                        </td>
+                      </tr>
+                    </t>
+
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bloc Livraison -->
+          <div class="card mb-4">
+            <div class="card-header bg-light">
+              <h5 class="mb-0">
+                <i class="fa fa-truck me-2"></i>
+                <span t-translation="on">Choose a Delivery Method</span>
+                <span class="text-danger">*</span>
+              </h5>
+            </div>
+            <div class="card-body">
+
+              <!-- Ramassage -->
+              <div class="form-check mb-3">
+                <input class="form-check-input"
+                       type="radio" id="deliv_pickup"
+                       name="x_delivery_method" value="pickup"
+                       t-att-checked="'checked' if (quote and quote.x_delivery_method == 'pickup') else None"/>
+                <label class="form-check-label" for="deliv_pickup">
+                  <strong><span t-translation="on">In-Store Pickup: $0.00</span></strong>
+                </label>
+              </div>
+
+              <!-- Livraison QC -->
+              <div class="form-check mb-3">
+                <div class="d-flex align-items-center gap-3">
+                  <input class="form-check-input"
+                         type="radio" id="deliv_ship"
+                         name="x_delivery_method" value="ship_qc"
+                         t-att-checked="'checked' if (quote and quote.x_delivery_method == 'ship_qc') else None"/>
+                  <label class="form-check-label" for="deliv_ship">
+                    <strong><span t-translation="on">Shipping in Quebec:</span></strong>
+                  </label>
+
+                  <!-- Valeur postée -->
+                  <input type="hidden" name="x_shipping_fee" value="37.0"/>
+
+                  <!-- Affichage lecture seule -->
+                  <div class="input-group" style="width: 150px;">
+                    <input id="x_shipping_fee_display"
+                           class="form-control form-control-sm text-end"
+                           type="text" value="37.00" readonly="readonly" disabled="disabled"/>
+                    <span class="input-group-text">$</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="d-flex gap-3 justify-content-end">
+            <a class="btn btn-secondary" href="/my/quotes">
+              <i class="fa fa-times me-1"></i>
+              <span t-translation="on">Cancel</span>
+            </a>
+            <button class="btn btn-warning" name="action" value="save" type="submit">
+              <i class="fa fa-save me-1"></i>
+              <span t-translation="on">Save Quote</span>
+            </button>
+            <button class="btn btn-primary" name="action" value="submit" type="submit">
+              <i class="fa fa-paper-plane me-1"></i>
+              <span t-translation="on">Submit Quote</span>
+            </button>
+          </div>
+
+        </form>
+
+        <!-- I18n pour JS -->
+        <div id="pcq-i18n" class="d-none">
+          <span id="i18n-needDesc" t-translation="on">Please provide the project description.</span>
+          <span id="i18n-needRef"  t-translation="on">Please provide the customer reference.</span>
+          <span id="i18n-needDate" t-translation="on">Please choose the expected delivery date.</span>
+          <span id="i18n-needDeliv" t-translation="on">Please choose a delivery method.</span>
+          <span id="i18n-needLine" t-translation="on">Add at least one product before submitting the quote.</span>
+          <span id="i18n-correct"  t-translation="on">Please correct the following:</span>
+        </div>
+
+        <script type="text/javascript">
+        //<![CDATA[
+          const I18N = (id) => {
+            const el = document.getElementById(id);
+            return el ? el.textContent : id;
+          };
+          const MSG = {
+            needDesc: I18N('i18n-needDesc'),
+            needRef:  I18N('i18n-needRef'),
+            needDate: I18N('i18n-needDate'),
+            needDeliv:I18N('i18n-needDeliv'),
+            needLine: I18N('i18n-needLine'),
+            correct:  I18N('i18n-correct'),
+          };
+
+          function pcqAlert(msgs) {
+            var box = document.getElementById('pcq-alert');
+            if (!box) return;
+            if (!Array.isArray(msgs)) msgs = [String(msgs)];
+            box.classList.remove('d-none');
+            box.innerHTML =
+              '<strong><i class="fa fa-exclamation-triangle me-2"></i>' +
+              MSG.correct + '</strong><ul class="mb-0 mt-2">' +
+              msgs.map(function(m){ return '<li>'+m+'</li>'; }).join('') + '</ul>';
+            window.scrollTo({ top: box.getBoundingClientRect().top + window.scrollY - 100, behavior: 'smooth' });
+          }
+
+          function repaintProductsByCategory() {
+            var cat  = document.getElementById('pcq-cat');
+            var prod = document.getElementById('pcq-product');
+            if (!cat || !prod) return;
+
+            var allOptions = Array.prototype.slice.call(prod.options).map(function (o) {
+              return { v: o.value, t: o.text, c: (o.dataset.cat || '') };
+            });
+
+            function repaint() {
+              var selectedCat = String(cat.value || '');
+              var filteredOpts = allOptions.filter(function (o) {
+                return !selectedCat || !o.c || String(o.c) === selectedCat || o.v === '';
+              });
+
+              prod.innerHTML = '';
+              filteredOpts.forEach(function (o) {
+                var opt = document.createElement('option');
+                opt.value = o.v;
+                opt.textContent = o.t;
+                opt.dataset.cat = o.c;
+                if (!o.v) opt.selected = true;
+                prod.appendChild(opt);
+              });
+            }
+
+            cat.addEventListener('change', repaint);
+            repaint();
+          }
+
+          function attachValidation() {
+            var form = document.getElementById('pcq-form');
+            if (!form) return;
+
+            form.addEventListener('submit', function (e) {
+              var submitter = e.submitter ? e.submitter.value : '';
+              if (!['save','submit'].includes(submitter)) return true;
+
+              var errs = [];
+              var pd  = (form.querySelector('[name="x_project_description"]').value || '').trim();
+              var ref = (form.querySelector('[name="x_customer_reference"]').value || '').trim();
+              var dat = (form.querySelector('[name="x_expected_date"]').value || '').trim();
+              var dm  = form.querySelector('input[name="x_delivery_method"]:checked');
+
+              if (!pd)  errs.push(MSG.needDesc);
+              if (!ref) errs.push(MSG.needRef);
+              if (!dat) errs.push(MSG.needDate);
+              if (!dm)  errs.push(MSG.needDeliv);
+
+              if (submitter === 'submit') {
+                var lineCount = document.querySelectorAll('.pcq-existing-row').length;
+                if (lineCount === 0) errs.push(MSG.needLine);
+              }
+
+              if (errs.length) {
+                e.preventDefault();
+                pcqAlert(errs);
+                return false;
+              }
+              return true;
+            });
+          }
+
+          document.addEventListener('DOMContentLoaded', function () {
+            repaintProductsByCategory();
+            attachValidation();
+          });
+        //]]>
+        </script>
+
+      </div>
+    </t>
+  </template>
+
+</odoo>

@@ -1,0 +1,339 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#   * portal_customer_quotes
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-14 20:21+0000\n"
+"PO-Revision-Date: 2025-10-14 20:21+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: fr_CA\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+# ---- Statuts (liste) ----
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_my_quotes
+msgid "Draft"
+msgstr "Brouillon"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_my_quotes
+msgid "Sent"
+msgstr "Envoyée"
+
+# ---- Placeholders (IMPORTANT: trois points ...) ----
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
+msgid "Describe your project..."
+msgstr "Décrivez votre projet..."
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
+msgid "Customer reference (e.g., PO-12345)"
+msgstr "Référence client (p. ex. : PO-12345)"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
+msgid "Any additional notes..."
+msgstr "Notes additionnelles..."
+
+# (tu peux garder aussi les versions avec l’ellipse si tu veux)
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
+msgid "Any additional notes…"
+msgstr "Notes additionnelles…"
+
+# ---- Liste "Mes soumissions" ----
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_my_quotes
+msgid "My Quotes"
+msgstr "Mes soumissions"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_my_quotes
+msgid "New Quote"
+msgstr "Nouvelle soumission"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_my_quotes
+msgid "No quotes yet."
+msgstr "Aucune soumission pour le moment."
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_my_quotes
+msgid "Quote"
+msgstr "Soumission"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_my_quotes
+msgid "Date"
+msgstr "Date"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_my_quotes
+msgid "Status"
+msgstr "Statut"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_my_quotes
+msgid "Actions"
+msgstr "Actions"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_my_quotes
+msgid "Edit"
+msgstr "Modifier"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_my_quotes
+msgid "Delete this quote?"
+msgstr "Supprimer cette soumission ?"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_my_quotes
+msgid "Delete"
+msgstr "Supprimer"
+
+# ---- Formulaire portail (libellés) ----
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
+msgid "Get a Quote"
+msgstr "Obtenir une soumission"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
+msgid "Edit Quote"
+msgstr "Modifier la soumission"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
+msgid "Back"
+msgstr "Retour"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
+msgid "Please correct the following errors:"
+msgstr "Veuillez corriger les erreurs suivantes :"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
+msgid "Quote Information"
+msgstr "Informations de la soumission"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
+msgid "Project Description"
+msgstr "Description du projet"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
+msgid "Customer Reference"
+msgstr "Référence client"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
+msgid "Expected Delivery Date"
+msgstr "Date de livraison prévue"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
+msgid "Note"
+msgstr "Note"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
+msgid "Products"
+msgstr "Produits"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
+msgid "Category"
+msgstr "Catégorie"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
+msgid "Product"
+msgstr "Produit"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
+msgid "Variant"
+msgstr "Variante"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
+msgid "Image"
+msgstr "Image"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
+msgid "Price ($)"
+msgstr "Prix ($)"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
+msgid "Description"
+msgstr "Description"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
+msgid "Quantity"
+msgstr "Quantité"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
+msgid "Remove"
+msgstr "Retirer"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
+msgid "Select Category"
+msgstr "Choisir une catégorie"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
+msgid "Select Product"
+msgstr "Choisir un produit"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
+msgid "Add"
+msgstr "Ajouter"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
+msgid "No products added yet. Use the row above to add products."
+msgstr "Aucun produit ajouté. Utilisez la ligne ci-dessus pour ajouter des produits."
+
+# ---- Livraison & actions ----
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
+msgid "Choose a Delivery Method"
+msgstr "Choisir un mode de livraison"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
+msgid "In-Store Pickup: $0.00"
+msgstr "Cueillette en magasin : 0,00 $"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
+msgid "Shipping in Quebec:"
+msgstr "Livraison au Québec :"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
+msgid "Cancel"
+msgstr "Annuler"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
+msgid "Save Quote"
+msgstr "Enregistrer"
+
+#. module: portal_customer_quotes
+#: model_terms:ir.ui.view,arch_db:portal_customer_quotes.portal_quote_form
+msgid "Submit Quote"
+msgstr "Envoyer la soumission"
+
+# ---- Messages Python ----
+#. module: portal_customer_quotes
+#. odoo-python
+#: code:addons/portal_customer_quotes/controllers/portal_quote.py:0
+#, python-format
+msgid "Please provide the project description."
+msgstr "Veuillez saisir la description du projet."
+
+#. module: portal_customer_quotes
+#. odoo-python
+#: code:addons/portal_customer_quotes/controllers/portal_quote.py:0
+#, python-format
+msgid "Please provide the customer reference."
+msgstr "Veuillez saisir la référence client."
+
+#. module: portal_customer_quotes
+#. odoo-python
+#: code:addons/portal_customer_quotes/controllers/portal_quote.py:0
+#, python-format
+msgid "Please choose the expected delivery date."
+msgstr "Veuillez choisir la date de livraison prévue."
+
+#. module: portal_customer_quotes
+#. odoo-python
+#: code:addons/portal_customer_quotes/controllers/portal_quote.py:0
+#, python-format
+msgid "Please choose a delivery method."
+msgstr "Veuillez choisir un mode de livraison."
+
+#. module: portal_customer_quotes
+#. odoo-python
+#: code:addons/portal_customer_quotes/controllers/portal_quote.py:0
+#, python-format
+msgid "Add at least one product before submitting the quote."
+msgstr "Ajoutez au moins un produit avant d’envoyer la soumission."
+
+#. module: portal_customer_quotes
+#. odoo-python
+#: code:addons/portal_customer_quotes/controllers/portal_quote.py:0
+#, python-format
+msgid "Shipping fee must be a positive number."
+msgstr "Les frais d’expédition doivent être un nombre positif."
+
+#. module: portal_customer_quotes
+#. odoo-python
+#: code:addons/portal_customer_quotes/controllers/portal_quote.py:0
+#, python-format
+msgid "Shipping fee must be a number."
+msgstr "Les frais d’expédition doivent être un nombre."
+
+# ---- Champs techniques ----
+#. module: portal_customer_quotes
+#: model:ir.model,name:portal_customer_quotes.model_sale_order
+msgid "Sales Order"
+msgstr "Commande client"
+
+#. module: portal_customer_quotes
+#: model:ir.model.fields,field_description:portal_customer_quotes.field_sale_order__x_project_description
+msgid "Project Description"
+msgstr "Description du projet"
+
+#. module: portal_customer_quotes
+#: model:ir.model.fields,field_description:portal_customer_quotes.field_sale_order__x_customer_reference
+msgid "Customer Reference"
+msgstr "Référence client"
+
+#. module: portal_customer_quotes
+#: model:ir.model.fields,field_description:portal_customer_quotes.field_sale_order__x_expected_date
+msgid "Expected Delivery Date"
+msgstr "Date de livraison prévue"
+
+#. module: portal_customer_quotes
+#: model:ir.model.fields,field_description:portal_customer_quotes.field_sale_order__x_note
+msgid "Additional Notes"
+msgstr "Notes additionnelles"
+
+#. module: portal_customer_quotes
+#: model:ir.model.fields,field_description:portal_customer_quotes.field_sale_order__x_delivery_method
+msgid "Delivery Method"
+msgstr "Mode de livraison"
+
+#. module: portal_customer_quotes
+#: model:ir.model.fields,field_description:portal_customer_quotes.field_sale_order__x_shipping_fee
+msgid "Shipping Fee"
+msgstr "Frais d’expédition"
+
+#. module: portal_customer_quotes
+#: model:ir.model.fields.selection,name:portal_customer_quotes.selection__sale_order__x_delivery_method__pickup
+msgid "In-Store Pickup"
+msgstr "Cueillette en magasin"
+
+#. module: portal_customer_quotes
+#: model:ir.model.fields.selection,name:portal_customer_quotes.selection__sale_order__x_delivery_method__ship_qc
+msgid "Shipping in Quebec"
+msgstr "Livraison au Québec"
