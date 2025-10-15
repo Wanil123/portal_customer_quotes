@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 {
     'name': 'Portal Customer Quotes',
     'version': '17.0.1.0.0',
@@ -6,12 +7,12 @@
     'description': """
 Portal Customer Quotes
 ======================
-* Clients can create, edit, and delete their own quotes (draft/sent states)
-* Product selection with category filtering
-* Image/variant/description display
-* Fixed shipping fee for Quebec: $37.00
-* Full i18n support (FR/EN)
-* Client-side and server-side validation
+* Clients (Portail) : lister / créer / modifier leurs soumissions (états brouillon/envoyée)
+* Sélection de produit au niveau *variante* (product.product)
+* Affichage image / variantes / description
+* Frais d’expédition fixe Québec : 37,00 $
+* I18n complet (FR/EN)
+* Validations côté client & serveur
     """,
     'author': 'Wanil Parfait',
     'website': '',
@@ -22,11 +23,6 @@ Portal Customer Quotes
         'security/portal_record_rules.xml',
         'views/portal_templates.xml',
     ],
-    'assets': {
-        'web.assets_frontend': [
-            'portal_customer_quotes/static/src/css/quote.css',
-        ],
-    },
     'installable': True,
     'application': False,
     'auto_install': False,
