@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Les utilisateurs Portail voient/éditent uniquement leurs soumissions (brouillon/envoyée) -->
+  <record id="rule_portal_own_quotations" model="ir.rule">
+    <field name="name">Portal: Own quotations (draft/sent)</field>
+    <field name="model_id" ref="sale.model_sale_order"/>
+    <field name="domain_force">
+      [('state','in',['draft','sent']),
+       ('partner_id','child_of', user.partner_id.commercial_partner_id.id)]
+    </field>
+    <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+    <field name="perm_read" eval="1"/>
+    <field name="perm_write" eval="1"/>
+    <field name="perm_create" eval="1"/>
+    <field name="perm_unlink" eval="0"/>
+  </record>
+</odoo>
