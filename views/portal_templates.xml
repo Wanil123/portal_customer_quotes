@@ -266,13 +266,18 @@
                             <small><t t-esc="cat.complete_name if cat else '—'"/></small>
                           </td>
                           <td><strong><t t-esc="l.product_id.display_name"/></strong></td>
+
+                          <!-- ====== CORRIGÉ ICI : variantes = variantes + attributs non-variant ====== -->
                           <td class="text-center">
-                            <t t-set="ptavs" t-value="l.product_id.product_template_attribute_value_ids"/>
+                            <t t-set="ptavs"
+                               t-value="l.product_id.product_template_attribute_value_ids | l.product_no_variant_attribute_value_ids"/>
                             <small>
                               <t t-if="ptavs"><t t-esc="', '.join(ptavs.mapped('name'))"/></t>
                               <t t-else="">—</t>
                             </small>
                           </td>
+                          <!-- ====================================================================== -->
+
                           <td class="text-center">
                             <t t-if="l.product_id.image_128">
                               <img t-att-src="'/web/image/product.product/%s/image_128' % l.product_id.id" style="height:40px;" class="img-thumbnail"/>
@@ -485,4 +490,27 @@
       </div>
     </t>
   </template>
+
+  <!-- Boutons Imprimer (avec/sans prix) sur la page détail de devis/commande (portail) -->
+  <template id="portal_quote_print_buttons"
+            inherit_id="sale.sale_order_portal_content"
+            name="Portal: Quote print buttons">
+
+    <!-- On insère APRES le tableau de totaux -->
+    <xpath expr="//t[@t-call='sale.sale_order_portal_content_totals_table']" position="after">
+      <div class="o_portal_call_to_action mt-3 d-print-none">
+        <a class="btn btn-secondary me-2"
+           t-att-href="'/report/pdf/portal_customer_quotes.modern_report_saleorder_with_prices/%s' % sale_order.id">
+          <i class="fa fa-print me-1"/>
+          <span t-translation="on">Print (with prices)</span>
+        </a>
+        <a class="btn btn-outline-secondary"
+           t-att-href="'/report/pdf/portal_customer_quotes.modern_report_saleorder_without_prices/%s' % sale_order.id">
+          <i class="fa fa-print me-1"/>
+          <span t-translation="on">Print (no prices)</span>
+        </a>
+      </div>
+    </xpath>
+  </template>
+
 </odoo>
